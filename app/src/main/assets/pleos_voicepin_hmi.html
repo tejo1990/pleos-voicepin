@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Pleos VoicePin</title>
+<style>
+  :root {
+    --bg-app: #0e1624;
+    --bg-card: #152238;
+    --border-app: #2b4266;
+    --text-main: #f4f8ff;
+    --text-sub: #9ab0d0;
+    --accent-cyan: #00e5ff;
+    --accent-blue: #0072ff;
+    --accent-green: #00e676;
+    --accent-amber: #ffab00;
+    --accent-coral: #ff5252;
+    --accent-purple: #b388ff;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Pretendard', 'Malgun Gothic', -apple-system, BlinkMacSystemFont, sans-serif;
+    user-select: none;
+  }
+
+  html, body {
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-app);
+    color: var(--text-main);
+    overflow: hidden;
+  }
+
+  .voicepin-app-window {
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-app);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ambient-strip {
+    height: 6px;
+    width: 100%;
+    background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-blue), var(--accent-cyan), transparent);
+    transition: background 0.35s ease;
+    flex-shrink: 0;
+  }
+
+  .app-inner {
+    flex: 1;
+    padding: 18px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .app-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .app-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #00e5ff, #0072ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    box-shadow: 0 4px 12px rgba(0, 229, 255, 0.35);
+  }
+  .app-name {
+    font-size: 21px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.3px;
+  }
+  .app-sub {
+    font-size: 12px;
+    color: var(--text-sub);
+    font-weight: 700;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .in-app-tabs {
+    display: flex;
+    background: #080e18;
+    border: 1px solid #223656;
+    border-radius: 12px;
+    padding: 3px;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .mode-tab {
+    background: transparent;
+    color: var(--text-sub);
+    border: none;
+    padding: 6px 11px;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .mode-tab.active {
+    background: #1b3358;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.25);
+  }
+
+  .gear-mode-pill {
+    background: rgba(0, 229, 255, 0.14);
+    border: 1px solid rgba(0, 229, 255, 0.45);
+    color: #84ffff;
+    padding: 6px 12px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+
+  /* DRIVING MODE (Gear=D): Focus Card */
+  .single-hero-card {
+    flex: 1;
+    background: linear-gradient(145deg, #17263f 0%, #101b2d 100%);
+    border: 2px solid #325180;
+    border-radius: 18px;
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    min-height: 0;
+  }
+
+  .hero-mode-pill {
+    display: inline-block;
+    align-self: flex-start;
+    background: rgba(0, 229, 255, 0.16);
+    border: 1.5px solid var(--accent-cyan);
+    color: var(--accent-cyan);
+    font-size: 13px;
+    font-weight: 900;
+    padding: 5px 12px;
+    border-radius: 8px;
+  }
+
+  .hero-main-title {
+    font-size: 24px;
+    font-weight: 900;
+    line-height: 1.3;
+    color: #ffffff;
+    letter-spacing: -0.4px;
+  }
+
+  .hero-voice-bar {
+    background: rgba(6, 11, 20, 0.82);
+    border-left: 5px solid var(--accent-cyan);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .voice-wave-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .voice-quote-text {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.42;
+    color: #eef5ff;
+  }
+
+  .hero-visual-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .visual-badge-box {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1.5px solid #2b446b;
+    border-radius: 12px;
+    padding: 11px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .visual-badge-box.highlight-green {
+    border-color: var(--accent-green);
+    background: rgba(0, 230, 118, 0.11);
+  }
+  .visual-badge-box.highlight-amber {
+    border-color: var(--accent-amber);
+    background: rgba(255, 171, 0, 0.11);
+  }
+  .visual-badge-box.highlight-purple {
+    border-color: var(--accent-purple);
+    background: rgba(179, 136, 255, 0.13);
+  }
+  .vb-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+  .vb-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-sub);
+    display: block;
+  }
+  .vb-value {
+    font-size: 14px;
+    font-weight: 900;
+    color: #fff;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* DEFAULT HOME (Gear=D): Forward VoicePin Radar List */
+  .forward-radar-card {
+    display: flex;
+    flex: 1;
+    background: linear-gradient(145deg, #152238 0%, #0f192a 100%);
+    border: 2px solid #2c466f;
+    border-radius: 18px;
+    padding: 16px 20px;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 9px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+    min-height: 0;
+  }
+  .radar-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #263d61;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .radar-head-title {
+    font-size: 16px;
+    font-weight: 900;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .radar-status-chip {
+    background: rgba(0, 230, 118, 0.14);
+    border: 1px solid rgba(0, 230, 118, 0.45);
+    color: #9cffc7;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .radar-item {
+    background: rgba(7, 12, 22, 0.78);
+    border: 1px solid #263d61;
+    border-left: 5px solid var(--accent-cyan);
+    border-radius: 12px;
+    padding: 11px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    transition: transform 0.15s, border-color 0.15s;
+  }
+  .radar-item-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+  }
+  .radar-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .dist-badge {
+    font-size: 12px;
+    font-weight: 900;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: rgba(0, 229, 255, 0.18);
+    color: var(--accent-cyan);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+  }
+  .dist-badge.purple {
+    background: rgba(179, 136, 255, 0.18);
+    color: #e1c4ff;
+    border-color: rgba(179, 136, 255, 0.45);
+  }
+  .dist-badge.amber {
+    background: rgba(255, 171, 0, 0.18);
+    color: #ffd54f;
+    border-color: rgba(255, 171, 0, 0.45);
+  }
+  .radar-item-title {
+    font-size: 13px;
+    font-weight: 900;
+    color: #dbe9ff;
+  }
+  .radar-item-quote {
+    font-size: 14px;
+    font-weight: 800;
+    color: #ffffff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .radar-action-btn {
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid #35527d;
+    color: #eef5ff;
+    font-size: 12px;
+    font-weight: 900;
+    padding: 9px 13px;
+    border-radius: 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .radar-action-btn.purple {
+    background: rgba(179, 136, 255, 0.18);
+    border-color: var(--accent-purple);
+    color: #f3e5f5;
+  }
+  .radar-action-btn.green {
+    background: rgba(0, 230, 118, 0.16);
+    border-color: var(--accent-green);
+    color: #b9f6ca;
+  }
+
+  /* PARKED MODE (Gear=P): Road Memory Card */
+  .parked-log-card {
+    display: none;
+    flex: 1;
+    background: var(--bg-card);
+    border: 2px solid #2c466f;
+    border-radius: 18px;
+    padding: 18px 20px;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 0;
+  }
+  .parked-card-head {
+    font-size: 16px;
+    font-weight: 900;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #263d61;
+  }
+  .parked-item {
+    background: rgba(7, 12, 22, 0.72);
+    border-left: 4px solid var(--accent-cyan);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .parked-item .pi-time {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--accent-cyan);
+  }
+  .parked-item .pi-title {
+    font-size: 15px;
+    font-weight: 900;
+    color: #fff;
+    margin: 3px 0;
+  }
+  .parked-item .pi-chip {
+    display: inline-block;
+    background: rgba(0, 230, 118, 0.15);
+    color: #9cffc7;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 6px;
+  }
+
+  /* Bottom Action Dock */
+  .app-bottom-dock {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .dock-btn {
+    flex: 1;
+    height: 52px;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .dock-btn.voice-ptt {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(0, 114, 255, 0.35);
+  }
+  .dock-btn.action-green {
+    background: linear-gradient(135deg, #00e676, #00b248);
+    color: #03170b;
+    box-shadow: 0 4px 14px rgba(0, 230, 118, 0.35);
+  }
+  .dock-btn.action-purple {
+    background: linear-gradient(135deg, #b388ff, #7c4dff);
+    color: #ffffff;
+    box-shadow: 0 4px 16px rgba(179, 136, 255, 0.38);
+  }
+  .dock-btn.action-neutral {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1.5px solid #35527d;
+    color: #dbe9ff;
+  }
+</style>
+</head>
+<body>
+
+  <div class="voicepin-app-window" id="appWindow">
+    <div class="ambient-strip" id="ambientTop"></div>
+
+    <div class="app-inner">
+      <div class="app-header">
+        <div class="app-title-group">
+          <div class="app-icon">📍</div>
+          <div>
+            <div class="app-name">Pleos VoicePin</div>
+            <div class="app-sub">SDV 거동 감지 보이스 핀 코파일럿</div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="in-app-tabs">
+            <button class="mode-tab active" id="tabHome" onclick="runScenario(0)">🏠 전방핀 홈</button>
+            <button class="mode-tab" id="tabStep1" onclick="runScenario(1)">1단계 거동감지</button>
+            <button class="mode-tab" id="tabSos" onclick="runScenario(3)">무터치 SOS</button>
+            <button class="mode-tab" id="tabStep2" onclick="runScenario(5)">2단계 IC우회</button>
+            <button class="mode-tab" id="tabStep3" onclick="runScenario(2)">3단계 실내차폐</button>
+            <button class="mode-tab" id="tabParked" onclick="setDriveState('parked')">주차(P) 일지</button>
+          </div>
+          <span class="gear-mode-pill" id="gearModeBadge">Gear D · 주행 모드</span>
+        </div>
+      </div>
+
+      <!-- DEFAULT HOME MODE (Gear == D, Normal Driving Radar) -->
+      <div class="forward-radar-card" id="forwardRadarCard">
+        <div class="radar-card-head">
+          <div class="radar-head-title">
+            <span>📡 전방 5km 보이스핀 레이더 (가까운 순)</span>
+          </div>
+          <span class="radar-status-chip" id="radarStatusChip">🟢 센서 정상 감시 중 · 전방 타일 3건</span>
+        </div>
+
+        <div class="radar-item" id="radarItem1">
+          <div class="radar-item-left">
+            <div class="radar-meta-row">
+              <span class="dist-badge" id="radarBadge1">전방 350m</span>
+              <span class="radar-item-title" id="radarTitle1">📌 [내 상습 북마크] 2차선 포트홀·물고임 미끄러짐 구간 (150m 진입 시 자동 브리핑)</span>
+            </div>
+            <div class="radar-item-quote" id="radarQuote1">"2차선 깊은 포트홀과 물고임 미끄러짐 있어요! 뒤따르는 분들 1차선으로 피하세요!"</div>
+          </div>
+          <button class="radar-action-btn" id="radarBtn1" onclick="previewRadarPinTts()">🔊 미리 듣기</button>
+        </div>
+
+        <div class="radar-item" style="border-left-color:var(--accent-purple);" id="radarItem2">
+          <div class="radar-item-left">
+            <div class="radar-meta-row">
+              <span class="dist-badge purple" id="radarBadge2">전방 1.5km</span>
+              <span class="radar-item-title" id="radarTitle2">🛡️ [환경 핀] 본선 2차선 아스팔트 절삭 분진·연기 구간 (진입 30초 전)</span>
+            </div>
+            <div class="radar-item-quote">"도로 본선 2차선 아스팔트 절삭 공사 분진과 타는 연기가 심합니다! 진입 전에 미리 창문 닫으세요!"</div>
+          </div>
+          <button class="radar-action-btn purple" id="radarBtn2" onclick="runScenario(2)">🛡️ 실내차폐 제안</button>
+        </div>
+
+        <div class="radar-item" style="border-left-color:var(--accent-amber);" id="radarItem3">
+          <div class="radar-item-left">
+            <div class="radar-meta-row">
+              <span class="dist-badge amber" id="radarBadge3">전방 4.8km</span>
+              <span class="radar-item-title" id="radarTitle3">🚨 [양재IC 너머 사고] IC 직후 1·2차선 추돌사고 정체 (내비 초록불 함정)</span>
+            </div>
+            <div class="radar-item-quote">"방금 IC 지나자마자 1·2차선 추돌사고 났어요! 내비는 아직 초록불인데 다 막혔으니 이번 IC로 빠지세요!"</div>
+          </div>
+          <button class="radar-action-btn green" id="radarBtn3" onclick="runScenario(5)">🔀 IC 우회 제안</button>
+        </div>
+      </div>
+
+      <!-- DRIVING EVENT POPUP MODE (Gear == D, Scenarios 1 / 2 / 3 / 5) -->
+      <div class="single-hero-card" id="drivingHeroCard" style="display:none;">
+        <span class="hero-mode-pill" id="heroStepBadge">📌 1단계 [남기기] · 이상 거동 감지 자동 팝업</span>
+
+        <div class="hero-main-title" id="heroHeadline">
+          노면 미끄러짐·급감속 감지!<br/>5초 보이스 핀 등록 완료
+        </div>
+
+        <div class="hero-voice-bar" id="heroVoiceBar">
+          <span class="voice-wave-icon" id="heroVoiceIcon">🎙️</span>
+          <div class="voice-quote-text" id="heroQuote">
+            "2차선 깊은 포트홀과 물고임 미끄러짐 있어요! 뒤따르는 분들 1차선으로 피하세요!"
+          </div>
+        </div>
+
+        <div class="hero-visual-stack">
+          <div class="visual-badge-box highlight-amber" id="vbBox1">
+            <span class="vb-icon" id="vbIcon1">🚨</span>
+            <div>
+              <span class="vb-label" id="vbLabel1">차량 물리 센서 트리거 (Pleos Vehicle SDK)</span>
+              <span class="vb-value" id="vbVal1">Safety.registerTelltales(ESC) + Brake + SteeringWheel</span>
+            </div>
+          </div>
+          <div class="visual-badge-box highlight-green" id="vbBox2">
+            <span class="vb-icon" id="vbIcon2">⏱️</span>
+            <div>
+              <span class="vb-label" id="vbLabel2">공용 핀 수명(SDV Auto-Clear) &amp; 내 도로 일지</span>
+              <span class="vb-value" id="vbVal2">후속 3대 정상 통과 시 공용핀 소멸 (내 일지는 시간순 보존)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PARKED MODE (Gear == P) -->
+      <div class="parked-log-card" id="parkedCardsArea">
+        <div class="parked-card-head">
+          <span>📓 나만의 도로 일지 (Road Memory · 내 핀 전용)</span>
+          <span style="font-size:12px; color:var(--accent-cyan);">타인핀 미저장 · 시간순 보존</span>
+        </div>
+
+        <div class="parked-item">
+          <div class="pi-time">오늘 14:28 · 애월 해안로 (33.489°N, 126.498°E)</div>
+          <div class="pi-title">📌 [상습 구간] 2차선 포트홀·결빙 회피 북마크</div>
+          <span class="pi-chip">🎬 블랙박스 시각(14:28:15) 보존 · 🔔 150m 재진입 알림 ON (내 차 3회 정상 통과 시 OFF)</span>
+        </div>
+
+        <div class="parked-item" style="border-left-color:var(--accent-amber);">
+          <div class="pi-time" style="color:var(--accent-amber);">오늘 14:15 · 양재 IC 본선 (37.462°N, 127.036°E)</div>
+          <div class="pi-title">🚨 [일회성 사고] 1·2차선 추돌사고 급정거 내 제보 핀</div>
+          <span class="pi-chip" style="color:#ffe082; background:rgba(255,171,0,0.15);">🎬 블랙박스 시각(14:15:08) 히스토리 전용 · 🔕 재진입 알림 OFF (익일 중복 알림 차단)</span>
+        </div>
+
+        <div class="parked-item" style="border-left-color:var(--accent-purple);">
+          <div class="pi-time" style="color:var(--accent-purple);">어제 08:42 · 상습 공사 분진·악취 구간</div>
+          <div class="pi-title">🛡️ [상습 구간] 내 출퇴근길 캐빈 실드 북마크</div>
+          <span class="pi-chip" style="color:#e9d5ff; background:rgba(179,136,255,0.16);">🎬 블랙박스 일지 보존 · 🔔 150m 재진입 차폐 제안 ON (내 차 3회 무차폐 통과 시 OFF)</span>
+        </div>
+      </div>
+
+      <div class="app-bottom-dock" id="bottomDock">
+        <button class="dock-btn voice-ptt" id="pttBtn" onclick="handleSecondaryAction()">
+          🎙️ 5초 보이스 핀 수동 등록
+        </button>
+        <button class="dock-btn action-neutral" id="primaryActionBtn" onclick="handlePrimaryAction()">
+          📡 주행 거동 감지 대기 중 (이상 거동 시 자동 팝업)
+        </button>
+      </div>
+    </div>
+
+    <div class="ambient-strip" id="ambientBottom"></div>
+  </div>
+
+<script>
+  let currentScenario = 0;
+  let currentDriveState = 'driving';
+  let autoReturnTimer = null;
+
+  function clearAutoReturnTimer() {
+    if (autoReturnTimer) {
+      clearTimeout(autoReturnTimer);
+      autoReturnTimer = null;
+    }
+  }
+
+  function scheduleReturnToHome(delayMs, statusText) {
+    clearAutoReturnTimer();
+    autoReturnTimer = setTimeout(() => {
+      if (currentDriveState === 'driving') {
+        runScenario(0);
+        if (statusText) {
+          const chip = document.getElementById('radarStatusChip');
+          if (chip) chip.innerText = statusText;
+        }
+      }
+    }, delayMs);
+  }
+
+  function highlightTab(tabId) {
+    ['tabHome', 'tabStep1', 'tabSos', 'tabStep2', 'tabStep3', 'tabParked'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('active', id === tabId);
+    });
+  }
+
+  function setAmbient(gradient) {
+    document.getElementById('ambientTop').style.background = gradient;
+    document.getElementById('ambientBottom').style.background = gradient;
+  }
+
+  function setDriveState(state, syncNative) {
+    clearAutoReturnTimer();
+    if (syncNative === undefined) syncNative = true;
+    const isDriving = (state === 'driving');
+    const showRadarHome = isDriving && (currentScenario === 0);
+    document.getElementById('forwardRadarCard').style.display = showRadarHome ? 'flex' : 'none';
+    document.getElementById('drivingHeroCard').style.display = (isDriving && !showRadarHome) ? 'flex' : 'none';
+    document.getElementById('parkedCardsArea').style.display = isDriving ? 'none' : 'flex';
+    document.getElementById('gearModeBadge').innerText = isDriving ? 'Gear D · 주행 모드' : 'Gear P · 주차 일지';
+
+    const pttBtn = document.getElementById('pttBtn');
+    const primaryBtn = document.getElementById('primaryActionBtn');
+
+    if (!isDriving) {
+      currentDriveState = 'parked';
+      highlightTab('tabParked');
+      if (syncNative && window.PleosNative && window.PleosNative.setGear) { window.PleosNative.setGear('P'); }
+      pttBtn.style.display = 'none';
+      primaryBtn.className = 'dock-btn action-neutral';
+      primaryBtn.innerText = '🅿️ 주차(P) 도로 일지 열람 모드 (내 블랙박스 시간순 북마크)';
+    } else {
+      const wasParked = (currentDriveState === 'parked');
+      currentDriveState = 'driving';
+      if (syncNative && wasParked && window.PleosNative && window.PleosNative.setGear) { window.PleosNative.setGear('D'); }
+      if (wasParked && currentScenario !== 0) {
+        currentScenario = 0;
+        document.getElementById('forwardRadarCard').style.display = 'flex';
+        document.getElementById('drivingHeroCard').style.display = 'none';
+      }
+      pttBtn.style.display = 'flex';
+    }
+  }
+
+  function previewRadarPinTts() {
+    if (window.PleosNative && window.PleosNative.sendPttBriefing) {
+      window.PleosNative.sendPttBriefing('Pleos-Radar-350m', '전방 350미터 2차선 깊은 포트홀과 물고임 미끄러짐 주의 구간입니다.', false);
+    }
+    const btn = document.getElementById('radarBtn1');
+    if (btn) {
+      btn.innerText = '🔊 브리핑 재생됨';
+      setTimeout(() => { btn.innerText = '🔊 미리 듣기'; }, 2500);
+    }
+  }
+
+  function updateLiveSensorBadge(text) {
+    const el = document.getElementById('vbVal1');
+    if (el && text) {
+      el.innerText = text;
+    }
+  }
+
+  function handlePrimaryAction() {
+    if (currentScenario === 0) {
+      runScenario(0);
+    } else if (currentScenario === 1 || currentScenario === 3) {
+      runScenario(0);
+    } else if (currentScenario === 5) {
+      escapeGreenMapTrap();
+    } else if (currentScenario === 2) {
+      activateCabinShieldByUserTap();
+    } else if (currentScenario === 21) {
+      restoreCabinShieldState();
+    } else {
+      runScenario(0);
+    }
+  }
+
+  function handleSecondaryAction() {
+    if (currentScenario === 0) {
+      runScenario(1);
+    } else if (currentScenario === 1) {
+      runScenario(1);
+    } else if (currentScenario === 21) {
+      runScenario(0);
+      const chip = document.getElementById('radarStatusChip');
+      if (chip) chip.innerText = '🛡️ 실내 차폐 유지 중 (창문 0% · 내기순환 ON)';
+    } else if (currentScenario === 5) {
+      document.getElementById('pttBtn').style.display = 'none';
+      const btn = document.getElementById('primaryActionBtn');
+      btn.className = 'dock-btn action-neutral';
+      btn.innerText = '🛣️ 현 경로 유지 선택됨 (전방 핀 홈으로 복귀 중...)';
+      scheduleReturnToHome(1800, '🛣️ 현 경로 유지 중 · 전방 4.8km 정체 감속 주의');
+    } else if (currentScenario === 2) {
+      document.getElementById('pttBtn').style.display = 'none';
+      const btn = document.getElementById('primaryActionBtn');
+      btn.className = 'dock-btn action-neutral';
+      btn.innerText = '🍃 외기 상태 유지 선택됨 (전방 핀 홈으로 복귀 중...)';
+      scheduleReturnToHome(1800, '🍃 현재 창문·외기 상태 유지 중');
+    }
+  }
+
+  function escapeGreenMapTrap() {
+    if (window.PleosNative && window.PleosNative.triggerIcDetour) {
+      window.PleosNative.triggerIcDetour();
+    }
+    currentScenario = 51;
+    document.getElementById('heroHeadline').innerHTML = '양재 IC 우회 경로 재탐색 완료!<br/>전방 초록불 정체 구간 회피 중';
+    document.getElementById('vbIcon2').innerText = '✅';
+    document.getElementById('vbLabel2').innerText = 'NaviHelper.requestRoute() 호출 완료';
+    document.getElementById('vbVal2').innerText = '순정 내비에 오른쪽 IC 우회 경유지 전달됨';
+    document.getElementById('pttBtn').style.display = 'none';
+    const btn = document.getElementById('primaryActionBtn');
+    btn.className = 'dock-btn action-neutral';
+    btn.innerText = '✅ 양재 IC 우회 완료 (🏠 전방 핀 홈으로 복귀)';
+    const b3 = document.getElementById('radarBtn3');
+    if (b3) b3.innerText = '✅ 우회 반영됨';
+    scheduleReturnToHome(2500, '✅ 양재 IC 우회 경로 안내 중 (NaviHelper 연동)');
+  }
+
+  function activateCabinShieldByUserTap() {
+    if (window.PleosNative && window.PleosNative.triggerCabinShield) {
+      window.PleosNative.triggerCabinShield('#B388FF');
+    }
+    currentScenario = 21;
+    document.getElementById('heroStepBadge').innerText = '🛡️ 3단계 [실내 차폐 작동 중] · 창문 0% & 내기순환 유지';
+    document.getElementById('heroHeadline').innerHTML = '창문 0% 닫기 &amp; 내기순환 완료!<br/>외부 연기·분진 유입 차단 중';
+    document.getElementById('vbIcon1').innerText = '✅';
+    document.getElementById('vbLabel1').innerText = 'Window.setWindowPosition(0) & HVAC 실행 완료';
+    document.getElementById('vbVal1').innerText = '전 좌석 창문 0% 닫힘 & 공조 내기순환(Recirculate) 전환 완료';
+
+    document.getElementById('vbIcon2').innerText = '🔄';
+    document.getElementById('vbLabel2').innerText = '연기·분진 구간(1.5km) 이탈 시 환기 복구 안내 (FusedLocation)';
+    document.getElementById('vbVal2').innerText = '구간 통과 후 우측 하단 [↩️ 창문·외기 원래대로]로 즉시 복구';
+
+    const pttBtn = document.getElementById('pttBtn');
+    pttBtn.style.display = 'flex';
+    pttBtn.className = 'dock-btn action-neutral';
+    pttBtn.innerText = '🏠 차폐 유지한 채 홈으로';
+
+    const btn = document.getElementById('primaryActionBtn');
+    btn.className = 'dock-btn action-purple';
+    btn.innerText = '↩️ 창문·외기 원래대로';
+    const b2 = document.getElementById('radarBtn2');
+    if (b2) b2.innerText = '🛡️ 차폐 작동 중';
+  }
+
+  function restoreCabinShieldState() {
+    if (window.PleosNative && window.PleosNative.restoreCabinShield) {
+      window.PleosNative.restoreCabinShield();
+    }
+    currentScenario = 22;
+    document.getElementById('heroHeadline').innerHTML = '연기·분진 구간 통과 완료!<br/>창문·외기유입 원래대로 복구됨';
+    document.getElementById('pttBtn').style.display = 'none';
+    const btn = document.getElementById('primaryActionBtn');
+    btn.className = 'dock-btn action-neutral';
+    btn.innerText = '🍃 창문·외기 복구 완료 (🏠 전방 핀 홈으로 복귀)';
+    const b2 = document.getElementById('radarBtn2');
+    if (b2) b2.innerText = '🛡️ 실내차폐 제안';
+    scheduleReturnToHome(2200, '🍃 창문·외기유입 원래대로 복구됨 · 정상 주행 감시 중');
+  }
+
+  function runScenario(num) {
+    clearAutoReturnTimer();
+    currentScenario = num;
+    setDriveState('driving', true);
+    const pttBtn = document.getElementById('pttBtn');
+    const btn = document.getElementById('primaryActionBtn');
+    const voiceBar = document.getElementById('heroVoiceBar');
+    const voiceIcon = document.getElementById('heroVoiceIcon');
+
+    if (num === 0) {
+      highlightTab('tabHome');
+      pttBtn.style.display = 'flex';
+      pttBtn.className = 'dock-btn voice-ptt';
+      pttBtn.innerText = '🎙️ 5초 보이스 핀 수동 등록';
+      btn.className = 'dock-btn action-neutral';
+      btn.innerText = '📡 주행 거동 감지 대기 중 (이상 거동 시 자동 팝업)';
+      setAmbient('linear-gradient(90deg, transparent, #00e5ff, #0072ff, #00e5ff, transparent)');
+      return;
+    }
+
+    if (num === 1) {
+      highlightTab('tabStep1');
+      if (window.PleosNative && window.PleosNative.triggerFiveSecondStt) {
+        window.PleosNative.triggerFiveSecondStt();
+      }
+      document.getElementById('heroStepBadge').innerText = '📌 1단계 [남기기] · 이상 거동 감지 자동 팝업';
+      document.getElementById('heroHeadline').innerHTML = '노면 미끄러짐·급감속 감지!<br/>5초 보이스 핀 등록 완료';
+      voiceBar.style.borderLeftColor = '#00e5ff';
+      voiceIcon.innerText = '🎙️';
+      document.getElementById('heroQuote').innerText = '"2차선 깊은 포트홀과 물고임 미끄러짐 있어요! 뒤따르는 분들 1차선으로 피하세요!"';
+
+      document.getElementById('vbBox1').className = 'visual-badge-box highlight-amber';
+      document.getElementById('vbIcon1').innerText = '🚨';
+      document.getElementById('vbLabel1').innerText = '차량 물리 센서 트리거 (Pleos Vehicle SDK)';
+      document.getElementById('vbVal1').innerText = 'Brake Pedal + Steering Angle + Telltales(ABS/ESC)';
+
+      document.getElementById('vbBox2').className = 'visual-badge-box highlight-green';
+      document.getElementById('vbIcon2').innerText = '⏱️';
+      document.getElementById('vbLabel2').innerText = '공용 핀 수명(SDV Auto-Clear) & 내 도로 일지';
+      document.getElementById('vbVal2').innerText = '후속 3대 정상 통과 시 공용핀 소멸 (내 일지는 시간순 보존)';
+
+      pttBtn.style.display = 'flex';
+      pttBtn.className = 'dock-btn voice-ptt';
+      pttBtn.innerText = '🎙️ 5초 보이스 핀 녹음됨';
+
+      btn.className = 'dock-btn action-neutral';
+      btn.innerText = '🏠 확인 · 전방 핀 홈으로 복귀';
+      const chip = document.getElementById('radarStatusChip');
+      if (chip) chip.innerText = '✅ 방금 내 5초 보이스핀 등록됨 · 전방 타일 3건 감시 중';
+      setAmbient('linear-gradient(90deg, transparent, #ffab00, #ff6e40, #ffab00, transparent)');
+    }
+    else if (num === 3) {
+      highlightTab('tabSos');
+      document.getElementById('heroStepBadge').innerText = '🆘 1단계 [무터치 SOS] · 정차·하차 즉시 자동 발송';
+      document.getElementById('heroHeadline').innerHTML = '비상 정차·비상등·차문 열림 감지!<br/>무터치 SOS 핀 자동 송출';
+      voiceBar.style.borderLeftColor = '#ff5252';
+      voiceIcon.innerText = '📡';
+      document.getElementById('heroQuote').innerText = '[시스템 자동 생성 SOS 전문] "전방 1.2km 우측 차로 고장 정차·하차 감지! 미리 좌측 차선으로 피하세요!"';
+
+      document.getElementById('vbBox1').className = 'visual-badge-box highlight-amber';
+      document.getElementById('vbIcon1').innerText = '🚪';
+      document.getElementById('vbLabel1').innerText = '차량 센서 무터치 감지 (Pleos Vehicle SDK)';
+      document.getElementById('vbVal1').innerText = 'Hazard Lights(On) + Door Position(Open) + Telltales(TPMS)';
+
+      document.getElementById('vbBox2').className = 'visual-badge-box highlight-green';
+      document.getElementById('vbIcon2').innerText = '⏱️';
+      document.getElementById('vbLabel2').innerText = 'SOS 핀 유효기간 (SDV Auto-Clear · TTL 30분)';
+      document.getElementById('vbVal2').innerText = '내 차 주행 재개 즉시 0초 삭제 (내 일지는 재진입 알림 OFF 보존)';
+
+      pttBtn.style.display = 'none';
+
+      btn.className = 'dock-btn action-neutral';
+      btn.innerText = '🏠 확인 · 전방 핀 홈으로 복귀 (주행 재개 시 자동 복귀)';
+      setAmbient('linear-gradient(90deg, transparent, #ff3d00, #ffab00, #ff3d00, transparent)');
+    }
+    else if (num === 5) {
+      highlightTab('tabStep2');
+      document.getElementById('heroStepBadge').innerText = '🔊 2단계 [자동 팝업] · 마지막 IC 1.2km 전 자동 브리핑';
+      document.getElementById('heroHeadline').innerHTML = '전방 4.8km 추돌사고 핀 자동 수신!<br/>이번 나들목(IC)으로 우회할까요?';
+      voiceBar.style.borderLeftColor = '#00e676';
+      voiceIcon.innerText = '🔊';
+      document.getElementById('heroQuote').innerText = '"방금 IC 지나자마자 1·2차선 추돌사고 났어요! 내비는 아직 초록불인데 다 막혔으니 이번 IC로 빠지세요!"';
+
+      document.getElementById('vbBox1').className = 'visual-badge-box highlight-amber';
+      document.getElementById('vbIcon1').innerText = '⚠️';
+      document.getElementById('vbLabel1').innerText = '스마트 크루즈 주행 주의 환기 (DrivingMode SDK)';
+      document.getElementById('vbVal1').innerText = 'DrivingMode.registerCruiseControlState Read-Only 감지';
+
+      document.getElementById('vbBox2').className = 'visual-badge-box highlight-green';
+      document.getElementById('vbIcon2').innerText = '🔀';
+      document.getElementById('vbLabel2').innerText = '1-Tap 우회(requestRoute) · 핀 유효성 실시간 검증';
+      document.getElementById('vbVal2').innerText = '후속차 감속 지속으로 핀 유지 중 (3대 정상통과 시 소멸)';
+
+      pttBtn.style.display = 'flex';
+      pttBtn.className = 'dock-btn action-neutral';
+      pttBtn.innerText = '✕ 현 경로 유지';
+
+      btn.className = 'dock-btn action-green';
+      btn.innerText = '🔀 이번 IC 우회 (1-Tap)';
+      setAmbient('linear-gradient(90deg, transparent, #00e676, #ffab00, #ff5252, transparent)');
+    }
+    else if (num === 2) {
+      highlightTab('tabStep3');
+      document.getElementById('heroStepBadge').innerText = '🛡️ 3단계 [자동 팝업] · 진입 30초 전 실내 보호 제안';
+      document.getElementById('heroHeadline').innerHTML = '전방 1.5km 화재 연기·분진 감지!<br/>창문 닫기 &amp; 내기순환 켜실래요?';
+      voiceBar.style.borderLeftColor = '#b388ff';
+      voiceIcon.innerText = '🔊';
+      document.getElementById('heroQuote').innerText = '"도로 본선 2차선 아스팔트 절삭 공사 분진과 타는 연기가 심합니다! 진입 전에 미리 창문 닫으세요!"';
+
+      document.getElementById('vbBox1').className = 'visual-badge-box highlight-purple';
+      document.getElementById('vbIcon1').innerText = '🛡️';
+      document.getElementById('vbLabel1').innerText = '1-Tap 능동형 캐빈 실드 (Window & HVAC SDK)';
+      document.getElementById('vbVal1').innerText = 'Window.setWindowPosition(0) & HVAC.setHvacRecirculation(true) 대기';
+
+      document.getElementById('vbBox2').className = 'visual-badge-box highlight-purple';
+      document.getElementById('vbIcon2').innerText = '⏱️';
+      document.getElementById('vbLabel2').innerText = '환경 핀 유효기간 (창문·공조 상태 연동 · TTL 45분)';
+      document.getElementById('vbVal2').innerText = '후속차 창문닫기 선택 시 연장 · 3대 연속 외기유입 통과 시 소멸';
+
+      pttBtn.style.display = 'flex';
+      pttBtn.className = 'dock-btn action-neutral';
+      pttBtn.innerText = '✕ 외기 상태 유지';
+
+      btn.className = 'dock-btn action-purple';
+      btn.innerText = '🛡️ 창문·공조 닫기 (1-Tap)';
+      setAmbient('linear-gradient(90deg, transparent, #b388ff, #00e5ff, #b388ff, transparent)');
+    }
+  }
+</script>
+</body>
+</html>
